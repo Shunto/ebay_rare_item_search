@@ -1,0 +1,1 @@
+web: gunicorn ebay_rare_item_search.wsgi --log-file -
