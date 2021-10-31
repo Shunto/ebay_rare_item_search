@@ -1,0 +1,15 @@
+__pycache__
+*~
+#*#
+#*
+*#
+*.swp
+*.swo
+*.log
+.DS_Store
+
+# Text backup files
+*.bak
+
+# Database
+*.sqlite3
