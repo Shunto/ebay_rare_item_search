@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import requests
 #import urllib2
 import json
@@ -24,6 +25,7 @@ def home(request):
 
     return render(request, 'ebay_api/home.html', context)
 
+@csrf_exempt
 def ebay_challenge_and_response_verification(request):
 
     if request.method == 'POST': # If the form has been submitted...
