@@ -1,5 +1,11 @@
 from django.shortcuts import render
+from django.http import HttpResponse
+from django.http import JsonResponse
 import requests
+#import urllib2
+import json
+import hashlib
+
 API_KEY = 'ShuntoMi-onlinefl-SBX-9abdb138a-8f290d89'
 
 # Create your views here.
@@ -15,3 +21,28 @@ def home(request):
     }
 
     return render(request, 'ebay_api/home.html', context)
+
+def ebay_challenge_and_response_verification(request):
+    challenge_code = request.GET.get('challenge_code')
+    verificationToken = '9jf@31i7jx9phr0w210#tt@4973iqcdg9b-(9+3pb-zl#qm3^-'
+    endpoint = 'https://ebayrareitemsearch.herokuapp.com'
+    #test = request.GET.url
+    #endpoint = str(request)
+    #request = urllib2.urlopen(request)
+    #test = str(request.read())
+    #test = str(request.info().keys())
+
+    #print(challenge_code)
+    #print(endpoint)
+    #str(string_to_hash).encode('utf-8')
+    m = hashlib.sha256(str(challenge_code+verificationToken+endpoint).encode('utf-8')).hexdigest();
+    #print(m);
+    response = {}
+    #response['status'] = 200
+    #response['response'] = 'SUCCESS'
+    response['challengeResponse'] = m
+    #response['test'] = test
+
+    return HttpResponse(json.dumps(response), status=200, content_type="application/json")
+    #return JsonResponse(response)
+    #return JsonResponse({'status':200, 'response':'SUCCESS'})
