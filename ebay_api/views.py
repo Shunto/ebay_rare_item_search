@@ -27,7 +27,7 @@ def ebay_challenge_and_response_verification(request):
     challenge_code = request.GET.get('challenge_code')
     verificationToken = EBAY_VERIFICATION_TOKEN
     #verificationToken = '9jf@31i7jx9phr0w210#tt@4973iqcdg9b-(9+3pb-zl#qm3^-'
-    endpoint = 'https://ebayrareitemsearch.herokuapp.com'
+    endpoint = 'https://ebayrareitemsearch.herokuapp.com/ebay-challenge-and-response-verification'
     #endpoint = str(request)
     #request = urllib2.urlopen(request)
     #test = request.GET.url
