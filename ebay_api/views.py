@@ -7,6 +7,7 @@ import json
 import hashlib
 
 API_KEY = 'ShuntoMi-onlinefl-SBX-9abdb138a-8f290d89'
+EBAY_VERIFICATION_TOKEN = 'vCseeOgaClqLpLYJpUunocWXAJwactBSZNlAHHMVJhSlAQvoYM'
 
 # Create your views here.
 
@@ -24,11 +25,12 @@ def home(request):
 
 def ebay_challenge_and_response_verification(request):
     challenge_code = request.GET.get('challenge_code')
-    verificationToken = '9jf@31i7jx9phr0w210#tt@4973iqcdg9b-(9+3pb-zl#qm3^-'
+    verificationToken = EBAY_VERIFICATION_TOKEN
+    #verificationToken = '9jf@31i7jx9phr0w210#tt@4973iqcdg9b-(9+3pb-zl#qm3^-'
     endpoint = 'https://ebayrareitemsearch.herokuapp.com'
-    #test = request.GET.url
     #endpoint = str(request)
     #request = urllib2.urlopen(request)
+    #test = request.GET.url
     #test = str(request.read())
     #test = str(request.info().keys())
 
