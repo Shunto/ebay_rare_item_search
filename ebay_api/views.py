@@ -3,20 +3,15 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import requests
-#import urllib2
 import json
 import hashlib
 import sys
 import os
 from ebay_rare_item_search.settings import BASE_DIR
-#sys.path.append(".")
-filepath = os.path.join(BASE_DIR, 'ebay_rare_item_search/ebay_api/ebay_api_calls')
 sys.path.append(os.path.join(BASE_DIR, 'ebay_api/modules'))
-#from filepath import findItemsByCategory
-#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ebay_rare_item_search.settings')
-#sys.path.append('/ebay_rare_item_search/ebay_api')
-
 from ebay_api_calls import findItemsByCategory
+from item_filters import uniqueItemFilterByProductId
+from google_search import googleSearch
 
 #API_KEY = 'ShuntoMi-onlinefl-SBX-9abdb138a-8f290d89'
 API_KEY = 'ShuntoMi-onlinefl-PRD-5abc8ca47-74474a69'
@@ -35,13 +30,14 @@ def home(request):
     condition = "3000"
     max_quantity = "1"
     min_quantity = "1"
+    item_keys = ["itemId", "title", "galleryURL", "viewItemURL"]
 
     item_filter = [
         {
             "name": "BestOfferOnly",
             "value": best_offer_only
-        }]
-    '''{
+        },
+        {
             "name": "MaxQuantity",
             #"paramName":
             #"paramValue":
@@ -53,7 +49,7 @@ def home(request):
             "paramValue": "",
             "value": min_quantity
         }
-    ]'''
+    ]
     '''{
             "name": "Condition",
             "paramName": "",
@@ -66,9 +62,8 @@ def home(request):
         category_id = category
         operation_name = 'findItemsByCategory'
         items = []
-        item_keys = ["itemId", "title", "galleryURL", "viewItemURL"]
         page_number = "1"
-        entries_per_page = "100"
+        entries_per_page = "30"
         pagination_input = {
             "entriesPerPage": entries_per_page,
             "pageNumber"    : page_number
@@ -113,6 +108,8 @@ def home(request):
             # filtering out items with no product ids
             if product_id_only == "true":
                 items = [item for item in items if "productId" in item]
+            # filtering out items when other items with the same product ids exist
+            items = uniqueItemFilterByProductId(items)
             
             #pagination_output.update(data[operation_name+'Response'][0]['paginationOutput'][0])
             pagination_output.append(data[operation_name+'Response'][0]['paginationOutput'][0])
@@ -122,18 +119,24 @@ def home(request):
         for item in items:
             for item_key in item_keys:
                 item[item_key] = item[item_key][0]
+                if "productId" in item:
+                    item["product_id"] = item["productId"][0]["__value__"]
 
         pagination_output = [pagination_output, page_number, len(items)]
+
+        #result_variables = {
+        #    "productId":
+        
         context = {
             'data': data,
             'items': items,
-            'pagination_output': pagination_output
+            'pagination_output': pagination_output,
         }
         return render(request, 'ebay_api/home.html', context)
     elif product_id:
         #operation_name = 'findItemsByCategory'
         operation_name = 'findItemsByProduct'
-        variables = 'categoryId=10181&paginationInput.entriesPerPage=10'
+        #variables = 'categoryId=10181&paginationInput.entriesPerPage=10'
         variables = 'paginationInput.entriesPerPage=10&productId.@type=ReferenceID&productId=' + product_id
         #variables = 'productId.@type=ReferenceID&productId={product_id}'
 
@@ -148,10 +151,16 @@ def home(request):
         #items = data.get(operation_name+'Response')[0].get('searchResult')[0].get('item')
         items = data[operation_name+'Response'][0]['searchResult'][0]['item']
 
-        item_keys = items[0].keys()
+        #item_keys = items[0].keys()
         for item in items:
             for item_key in item_keys:
                 item[item_key] = item[item_key][0]
+                if "productId" in item:
+                    #item["productId"] = item["productId"][0]
+                    #item["productId"][0]["value"] = item["productId"][0]["__value__"]
+                    #item["productId"] = item["productId"][0]
+                    item["product_id"] = item["productId"][0]["__value__"]
+
         #for item_key in item_keys:
         #    items[0][item_key] = items[0][item_key][0]
 
@@ -167,6 +176,19 @@ def home(request):
         return render(request, 'ebay_api/home.html', context)
     else:
         return render(request, 'ebay_api/home.html')
+
+def google_search_results(request):
+    
+    query = request.GET.get('query')
+
+    links =  googleSearch(query)
+    
+    results = {
+        "query": query,
+        "links": links
+    }
+    
+    return render(request, 'ebay_api/google_search_results.html', results)
 
 @csrf_exempt
 def ebay_challenge_and_response_verification(request):

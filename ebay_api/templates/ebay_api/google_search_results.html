@@ -1,0 +1,13 @@
+{% extends 'ebay_api/base.html' %}
+
+{% block content %}
+    <h2>Google Search Results</h2>
+
+    {% for link in links %}
+        <a href="{{ link }}" target="_blank">{{ forloop.counter0|add:1 }}. {{ link }}</a>
+        <!-- <a ="{{ link }}" target="_blank">{{ link }}</a> -->
+        <br>
+        <br>
+        
+    {% endfor %}
+{% endblock%}

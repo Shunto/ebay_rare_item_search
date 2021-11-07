@@ -47,16 +47,13 @@
         <img src="{{ item.galleryURL }}" alt="" height="200px" width="200px">
         <p>{{ item.itemId }}</p>
         <p>{{ item.title }}</p>
-        <p>{#{ item.product_id }#}</p>
+        <p>{#{ item.productId }#}</p>
 
         <a href="{{ item.viewItemURL }}" target="_blank" class="btn btn-success">See This Item on eBay</a>
         <!--<li class="list-group-item"><a class="btn btn-secondary" href="{% url 'home' %}?product_id=1400797014&best_offer_only=false&product_id_only=true&sample_count=1">Sports</a></li> -->
-        <a href="{% url 'home' %}?product_id={{ item.product_id }}" class="btn btn-primary" target="_blank">Look For This Item On eBay Outside Best Offer</a>
+        <a href="{% url 'home' %}?product_id=1400797014" class="btn btn-primary" target="_blank">Look For This Item On eBay Outside Best Offer</a>
         
-        <a href="{% url 'google_search_results' %}?query={{ item.title }}" target="_blank" class="btn btn-info">Look For This Item Outside eBay</a>
-        <br>
-        <br>
-        <br>
+        <a href="{% url 'home' %}" target="_blank" class="btn btn-info">Look For This Item Outside eBay</a>
         
     {% endfor %}
     {#{ items }#}

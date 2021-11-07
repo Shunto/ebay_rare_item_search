@@ -50,7 +50,41 @@ def findItemsByCategory(categoryId, itemFilter=None, paginationInput=None, encod
             for key in item:
                 key_elem = etree.SubElement(itemFilter_elem, key)
                 key_elem.text = item[key]
+ 
+    if paginationInput:
+        paginationInput_elem = etree.SubElement(root, "paginationInput")
+        for key in paginationInput:
+            key_elem = etree.SubElement(paginationInput_elem, key)
+            key_elem.text = paginationInput[key]
 
+    #request_xml = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="utf-8")
+    request_xml = etree.tostring(root, pretty_print=True)
+    print("request_xml: {}".format(request_xml))
+    
+    data = request_xml
+
+    response = getEbayFindingApiResponse(operation_name, data, encoding)
+    print("response: {}".format(response))
+    
+    return response
+
+
+def findItemsByProduct(productId, itemFilter=None, paginationInput=None, encoding="JSON"):
+
+    operation_name = "findItemsByProduct"
+    
+    root = etree.Element(operation_name, xmlns="http://www.ebay.com/marketplace/search/v1/services")
+
+    productId_elem = etree.SubElement(root, "productId", type="ReferenceID")
+    productId_elem.text = productId
+          
+    if itemFilter:
+        for item in itemFilter:
+            itemFilter_elem = etree.SubElement(root, "itemFilter")
+            for key in item:
+                key_elem = etree.SubElement(itemFilter_elem, key)
+                key_elem.text = item[key]
+ 
     if paginationInput:
         paginationInput_elem = etree.SubElement(root, "paginationInput")
         for key in paginationInput:
