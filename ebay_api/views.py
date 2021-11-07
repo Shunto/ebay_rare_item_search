@@ -11,7 +11,7 @@ from ebay_rare_item_search.settings import BASE_DIR
 sys.path.append(os.path.join(BASE_DIR, 'ebay_api/modules'))
 from ebay_api_calls import findItemsByCategory
 from item_filters import uniqueItemFilterByProductId
-from google_search import googleSearch
+#from google_search import googleSearch
 
 #API_KEY = 'ShuntoMi-onlinefl-SBX-9abdb138a-8f290d89'
 API_KEY = 'ShuntoMi-onlinefl-PRD-5abc8ca47-74474a69'
@@ -63,7 +63,7 @@ def home(request):
         operation_name = 'findItemsByCategory'
         items = []
         page_number = "1"
-        entries_per_page = "30"
+        entries_per_page = "50"
         pagination_input = {
             "entriesPerPage": entries_per_page,
             "pageNumber"    : page_number
@@ -176,7 +176,7 @@ def home(request):
         return render(request, 'ebay_api/home.html', context)
     else:
         return render(request, 'ebay_api/home.html')
-
+'''
 def google_search_results(request):
     
     query = request.GET.get('query')
@@ -189,6 +189,7 @@ def google_search_results(request):
     }
     
     return render(request, 'ebay_api/google_search_results.html', results)
+'''
 
 @csrf_exempt
 def ebay_challenge_and_response_verification(request):
