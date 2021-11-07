@@ -8,8 +8,11 @@ import json
 import hashlib
 import sys
 import os
+from ebay_rare_item_search.settings import BASE_DIR
 #sys.path.append(".")
-sys.path.append('/Users/shuntomizushima/programs/research/ebay_rare_item_search/ebay_api')
+filepath = os.path.join(BASE_DIR, 'ebay_rare_item_search/ebay_api/ebay_api_calls')
+sys.path.append(os.path.join(BASE_DIR, 'ebay_api/modules'))
+#from filepath import findItemsByCategory
 #os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ebay_rare_item_search.settings')
 #sys.path.append('/ebay_rare_item_search/ebay_api')
 
