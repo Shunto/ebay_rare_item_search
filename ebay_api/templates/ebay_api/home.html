@@ -1,15 +1,48 @@
 {% extends 'ebay_api/base.html' %}
 
 {% block content %}
-    <h2>Search Product Id</h2>
+    <h2>Search by Category</h2>
+
+        <form action="" method="get">
+            <select name="category" data-placeholder="Category">
+	            <option value="58058">Computers/Tablets & Networking</option>
+                <option value="11700">Home & Garden</option>
+                <option value="1">Collectibles</option>
+            </select>
+
+            <select name="best_offer_only" data-placeholder="Select a category">
+	            <option value="false">All Listings</option>
+                <option value="true">Accepts Offers</option>
+            </select>
+
+            <select name="product_id_only" data-placeholder="Select a category">
+	            <option value="false">Items Without Product IDs</option>
+                <option value="true">Items With Product IDs </option>
+            </select>
+            <input type="text" placeholder="30" name="sample_count">
+            
+        <!-- </form>
+       
+        <form action="" method="get"> 
+            <input type="text" name="category"> -->
+            <button type="submit" value="Search">Search</button>
+        </form>
+        <br>
+        <br>
+
+    <!-- <h2>Search by Product Id</h2>
 
         <form action="" method="get">
             <input type="text" name="product_id">
             <button type="submit" value="Search">Search</button>
         </form>
         <br>
-        <br>
-    <p>{{ pagination_output.totalEntries }}</p>    
+        <br> -->
+        
+    <p>{#{ pagination_output.totalEntries }#}</p>
+    <p>{{ pagination_output }}</p>
+    <p>{#{ items }#}
+    <p>{#{ pagination_output }#}</p>    
     {% for item in items %}
         <img src="{{ item.galleryURL }}" alt="" height="200px" width="200px">
         <p>{{ item.itemId }}</p>

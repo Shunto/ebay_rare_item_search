@@ -145,6 +145,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # The URL to use when referring to static files (where they will be served from)
 STATIC_URL = '/static/'
 
+# this is the static files folder name which you created in django project root folder. This is different from above STATIC_URL. 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'statics'),
+]
+VENV_PATH = os.path.dirname(BASE_DIR)
+STATIC_ROOT = os.path.join(VENV_PATH, 'static_root')
+
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
