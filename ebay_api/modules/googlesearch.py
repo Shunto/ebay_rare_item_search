@@ -37,11 +37,11 @@ if sys.version_info[0] > 2:
     from http.cookiejar import LWPCookieJar
     from urllib.request import Request, urlopen
     from urllib.parse import quote_plus, urlparse, parse_qs
-else:
+'''else:
     from cookielib import LWPCookieJar
     from urllib import quote_plus
     from urllib2 import Request, urlopen
-    from urlparse import urlparse, parse_qs
+    from urlparse import urlparse, parse_qs'''
 
 try:
     from bs4 import BeautifulSoup
