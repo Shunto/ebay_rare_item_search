@@ -120,7 +120,7 @@ except Exception:
 
 
 # Get a random user agent.
-[docs]def get_random_user_agent():
+def get_random_user_agent():
     """
     Get a random user agent string.
 
@@ -132,7 +132,7 @@ except Exception:
 
 
 # Helper function to format the tbs parameter.
-[docs]def get_tbs(from_date, to_date):
+def get_tbs(from_date, to_date):
     """
     Helper function to format the tbs parameter.
 
@@ -210,7 +210,7 @@ def filter_result(link):
 
 
 # Returns a generator that yields URLs.
-[docs]def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
+def search(query, tld='com', lang='en', tbs='0', safe='off', num=10, start=0,
            stop=None, pause=2.0, country='', extra_params=None,
            user_agent=None, verify_ssl=True):
     """
@@ -367,7 +367,7 @@ def filter_result(link):
 
 # Shortcut to single-item search.
 # Evaluates the iterator to return the single URL as a string.
-[docs]def lucky(*args, **kwargs):
+def lucky(*args, **kwargs):
     """
     Shortcut to single-item search.
 
