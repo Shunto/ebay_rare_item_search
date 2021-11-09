@@ -91,7 +91,7 @@ def home(request):
             page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
         random.shuffle(page_numbers)
         randomized_page_numbers = page_numbers
-        entries_per_page = "5" # Min: 0, Max: 100
+        entries_per_page = "10" # Min: 0, Max: 100
         total_searched_item_count = 0
         pagination_input = {
             "entriesPerPage": entries_per_page,
@@ -168,7 +168,7 @@ def home(request):
             #page_number = str(int(page_number) + 1)
             pagination_input["pageNumber"] = str(randomized_page_numbers[page_count])
 
-        for item in items:
+        for item in rare_items:
             for item_key in item_keys:
                 item[item_key] = item[item_key][0]
                 if "conditionDisplayName" in item[item_key]:
