@@ -26,23 +26,32 @@ def getCategories(detailLevel="ReturnAll", levelLimit=1, categorySiteId=0):
     levelLimit_elem.text = str(levelLimit)
 
     request_xml = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="utf-8")
-    print("request_xml: {}".format(request_xml))
+    #print("request_xml: {}".format(request_xml))
     
     data = request_xml
 
     response = getEbayApiResponse(endpoint, operation_name, data)
-    print("response: {}".format(response))
+    #print("response: {}".format(response))
     
     return response
 
-def findItemsByCategory(categoryId, itemFilter=None, paginationInput=None, encoding="JSON"):
 
-    operation_name = "findItemsByCategory"
+def findItemsAdvanced(keywords, categoryId=None, descriptionSearch=None, itemFilter=None, paginationInput=None, encoding="JSON"):
+
+    operation_name = "findItemsAdvanced"
     
-    root = etree.Element(operation_name, xmlns="http://www.ebay.com/marketplace/search/v1/services")
-    
-    categoryId_elem = etree.SubElement(root, "categoryId")
-    categoryId_elem.text = categoryId
+    root = etree.Element("findItemsAdvanced", xmlns="http://www.ebay.com/marketplace/search/v1/services")
+
+    keywords_elem = etree.SubElement(root, "keywords")
+    keywords_elem.text = keywords
+
+    if categoryId:
+        categoryId_elem = etree.SubElement(root, "categoryId")
+        categoryId_elem.text = categoryId
+
+    if descriptionSearch:
+        descriptionSearch_elem = etree.SubElement(root, "descriptionSearch")
+        descriptionSearch_elem.text = descriptionSearch
     
     if itemFilter:
         for item in itemFilter:
@@ -59,12 +68,50 @@ def findItemsByCategory(categoryId, itemFilter=None, paginationInput=None, encod
 
     #request_xml = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="utf-8")
     request_xml = etree.tostring(root, pretty_print=True)
-    print("request_xml: {}".format(request_xml))
+    #print("request_xml: {}".format(request_xml))
     
     data = request_xml
 
     response = getEbayFindingApiResponse(operation_name, data, encoding)
-    print("response: {}".format(response))
+    #print("response: {}".format(response))
+    
+    return response
+
+        
+def findItemsByCategory(categoryId, itemFilter=None, paginationInput=None, encoding="JSON"):
+
+    operation_name = "findItemsByCategory"
+    
+    root = etree.Element(operation_name, xmlns="http://www.ebay.com/marketplace/search/v1/services")
+    
+    categoryId_elem = etree.SubElement(root, "categoryId")
+    categoryId_elem.text = categoryId
+
+    if categoryId:
+        categoryId_elem = etree.SubElement(root, "categoryId")
+        categoryId_elem.text = categoryId
+    
+    if itemFilter:
+        for item in itemFilter:
+            itemFilter_elem = etree.SubElement(root, "itemFilter")
+            for key in item:
+                key_elem = etree.SubElement(itemFilter_elem, key)
+                key_elem.text = item[key]
+ 
+    if paginationInput:
+        paginationInput_elem = etree.SubElement(root, "paginationInput")
+        for key in paginationInput:
+            key_elem = etree.SubElement(paginationInput_elem, key)
+            key_elem.text = paginationInput[key]
+
+    #request_xml = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="utf-8")
+    request_xml = etree.tostring(root, pretty_print=True)
+    #print("request_xml: {}".format(request_xml))
+    
+    data = request_xml
+
+    response = getEbayFindingApiResponse(operation_name, data, encoding)
+    #print("response: {}".format(response))
     
     return response
 
@@ -93,16 +140,17 @@ def findItemsByProduct(productId, itemFilter=None, paginationInput=None, encodin
 
     #request_xml = etree.tostring(root, pretty_print=True, xml_declaration=True, encoding="utf-8")
     request_xml = etree.tostring(root, pretty_print=True)
-    print("request_xml: {}".format(request_xml))
+    #print("request_xml: {}".format(request_xml))
     
     data = request_xml
 
     response = getEbayFindingApiResponse(operation_name, data, encoding)
-    print("response: {}".format(response))
+    #print("response: {}".format(response))
     
     return response
     
     
 if __name__ == "__main__":
     #getCategories()
-    findItemsByCategory("58058")
+    #findItemsByCategory("58058")
+    findItemsAdvanced("3d Systems Sense USB 3d Scanner 391230")

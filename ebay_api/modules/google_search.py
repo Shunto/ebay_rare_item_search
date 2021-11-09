@@ -10,6 +10,8 @@ def googleSearch(query, country="us", num=20, stop=10, pause=2):
 
     return links
 
+
+
 if __name__ == "__main__":
 
     googleSearch("TN014 TN-014 A3VV130 Genuine Konica Minolta Toner For Pro 1250 1052")

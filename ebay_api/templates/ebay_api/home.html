@@ -1,31 +1,66 @@
 {% extends 'ebay_api/base.html' %}
 
 {% block content %}
-    <h2>Search by Category</h2>
+    <h2>Search by Category:</h2>
 
         <form action="" method="get">
-            <select name="category" data-placeholder="Category" id="hero_select">
+            <select name="category" data-placeholder="Category" id="category_select">
 	            <option value="58058">Computers/Tablets & Networking</option>
                 <option value="11700">Home & Garden</option>
                 <option value="1">Collectibles</option>
             </select>
 
-            <select name="best_offer_only" data-placeholder="Select a category">
+            <select name="best_offer_only" data-placeholder="All Listings or Best Offer " id="best_offer_only_select">
 	            <option value="false">All Listings</option>
                 <option value="true">Accepts Offers</option>
             </select>
 
-            <select name="product_id_only" data-placeholder="Select a category">
-	            <option value="false">Items Without Product IDs</option>
-                <option value="true">Items With Product IDs </option>
+            <select name="title_search" data-placeholder="Title Search" id="title_search_select">
+	            <option value="false">Title Search Off</option>
+                <option value="true">Items With Unique Titles</option>
             </select>
+
+            <select name="product_id_only" data-placeholder="Product Id Search" id="product_id_only_select">
+                <option value="both">Both Items With and Without Product IDs</option>
+                <option value="true">Items With Product IDs</option>
+                <option value="false">Items Without Product IDs</option>
+            </select>
+            <select name="condition" data-placeholder="Condition" id="condition_select">
+	            <option value="">all</option>
+                <option value="1000">New</option>
+                <option value="1500">New other</option>
+                <option value="1750">New with defects</option>
+                <option value="2000">Manufacturer refurbished</option>
+                <option value="2500">Seller refurbished</option>
+                <option value="2750">Like New</option>
+                <option value="3000">Used</option>
+                <option value="4000">Very Good</option>
+                <option value="5000">Good</option>
+                <option value="6000">Acceptable</option>
+                <option value="7000">For parts / not working</option>
+            </select>
+            <input type="text" placeholder="10" name="min_price">
+            <input type="text" placeholder="10000" name="max_price">
             <input type="text" placeholder="30" name="sample_count">
             
         <!-- </form>
        
         <form action="" method="get"> 
-            <input type="text" name="category"> -->
-            <button type="submit" value="Search">Search</button>
+          <input type="text" name="category"> -->
+        <!--<div style="padding-left:0;" class="columns medium-8 float-left">
+            <a target="_blank" href="https://github.com/prevwong/awesome-select/" class="button">
+                <div class="bg"></div>
+                <div class="content">Grab the source!</div>
+            </a>-->
+        </div>
+
+         <!-- <div style="padding-right:0" class="columns medium-4 float-left"> -->
+        <div style="padding-left:0;" class="columns medium-8 float-left">
+            <button type="submit" value="Search" class="button">
+                <div class="bg"></div>
+                <div class="content">Search</div>
+            </button>
+        </div>
         </form>
         <br>
         <br>
@@ -40,21 +75,61 @@
         <br> -->
         
     <p>{#{ pagination_output.totalEntries }#}</p>
-    <p>{{ pagination_output }}</p>
+    <p>{#{ pagination_output }#}</p>
+    <p>{#{ output_info }#}</p>
     <p>{#{ items }#}
-    <p>{#{ pagination_output }#}</p>    
-    {% for item in items %}
+    <p>{#{ pagination_output }#}</p>
+    <br>
+    <br>
+    {% if item %}
+        <h2>Searched Results:</h2>
+    {% endif %}
+    {% if output_info %}
+        <p>{{ output_info.sampled_rare_item_count }} Sampled Rare Items</p>
+        <p>{{ output_info.total_rare_item_count}} Rare Items Found In Total Out Of {{ output_info.total_searched_item_count }} Sampled Items</p>
+        <p>{{ output_info.total_entries }} Items Found In Total By Category {{ output_info.searched_category }}
+    {% endif %}
+    {% for item in items %}</p>
         <img src="{{ item.galleryURL }}" alt="" height="200px" width="200px">
-        <p>{{ item.itemId }}</p>
-        <p>{{ item.title }}</p>
+        <p>Item ID: {{ item.itemId }}</p>
+        <p>Item Title: {{ item.title }}</p>
+        <p>Condition: {{ item.condition.conditionDisplayName }}</p>
+        <p>Detailed Category: {{ item.primaryCategory.categoryName }}
         <p>{#{ item.product_id }#}</p>
 
-        <a href="{{ item.viewItemURL }}" target="_blank" class="btn btn-success">See This Item on eBay</a>
+        <!-- <a href="{{ item.viewItemURL }}" target="_blank" class="btn btn-success">See This Item on eBay</a> -->
+        <div style="padding-right:0" class="columns medium-8 float-left">
+            <a href="{{ item.viewItemURL }}" target="_blank" class="button">
+                <div class="bg"></div>
+                <div class="content">See This Item on eBay</div>
+            </a>
+        </div>
         <!--<li class="list-group-item"><a class="btn btn-secondary" href="{% url 'home' %}?product_id=1400797014&best_offer_only=false&product_id_only=true&sample_count=1">Sports</a></li> -->
-        <a href="{% url 'home' %}?product_id={{ item.product_id }}" class="btn btn-primary" target="_blank">Look For This Item On eBay Outside Best Offer</a>
+        {% if item.product_id %}
+        <!-- <a href="{% url 'home' %}?product_id={{ item.product_id }}" class="btn btn-primary" target="_blank">Look For This Item On eBay Outside Best Offer</a> -->
+        <div style="padding-right:0" class="columns medium-8 float-left">
+            <a href="{% url 'home' %}?product_id={{ item.product_id }}" class="button" target="_blank">
+                <div class="bg"></div>
+                <div class="content">Look For This Item On eBay Outside Best Offer</div>
+            </a>
+        </div>
+        {% else %}
+        <!-- <a href="{% url 'home' %}?title={{ item.title }}" class="btn btn-primary" target="_blank">Look For This Item On eBay Outside Best Offer</a> -->
+        <div style="padding-right:0" class="columns medium-8 float-left">
+            <a href="{% url 'home' %}?title={{ item.title }}" class="button" target="_blank">
+                <div class="bg"></div>
+                <div class="content">Look For This Item On eBay Outside Best Offer</div>
+            </a>
+        </div>
+        {% endif %}
         
-        <a href="{% url 'google_search_results' %}?query={{ item.title }}" target="_blank" class="btn btn-info">Look For This Item Outside eBay</a>
-        <br>
+        <!-- <a href="{% url 'google_search_results' %}?query={{ item.title }}" target="_blank" class="btn btn-info">Look For This Item Outside eBay</a> -->
+        <div style="padding-right:0" class="columns medium-8 float-left">
+            <a href="{% url 'google_search_results' %}?query={{ item.title }}" target="_blank" class="button">
+                <div class="bg"></div>
+                <div class="content">Look For This Item Outside eBay</div>
+             </a>
+        </div>
         <br>
         <br>
         
