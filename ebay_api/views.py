@@ -160,7 +160,9 @@ def home(request):
             page_count += 1
             searched_item_count = data[operation_name+'Response'][0]['paginationOutput'][0]['entriesPerPage'][0]
             total_searched_item_count += int(searched_item_count)
-            
+
+            if page_count == len(randomized_page_numbers):
+                break
             if page_count == total_pages:
                 break
             #page_number = str(int(page_number) + 1)
