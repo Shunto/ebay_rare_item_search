@@ -140,13 +140,14 @@ def home(request):
             if int(total_pages) <= 100:
                 page_numbers = list(range(1, int(total_pages)+1))
             else:
-                #page_numbers = list(range(1, 101)) # max allowed page number = 100
-                page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
+                page_numbers = list(range(1, 101)) # max allowed page number = 100
+                #page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
             random.shuffle(page_numbers)
             randomized_page_numbers = page_numbers
             randomized_page_number_list.append(randomized_page_numbers)
 
-        entries_per_page = "5" # Min: 0, Max: 100
+        #entries_per_page = "5" # Min: 0, Max: 100
+        entries_per_page = "100" # Min: 0, Max: 100
         random_item_batch_count = "1"
         total_searched_item_count = 0
         pagination_output = []
@@ -251,11 +252,12 @@ def home(request):
         if int(total_pages) <= 100:
             page_numbers = list(range(1, int(total_pages)+1))
         else:
-            #page_numbers = list(range(1, 101)) # max allowed page number = 100
-            page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
+            page_numbers = list(range(1, 101)) # max allowed page number = 100
+            #page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
         random.shuffle(page_numbers)
         randomized_page_numbers = page_numbers
-        entries_per_page = "5" # Min: 0, Max: 100
+        #entries_per_page = "5" # Min: 0, Max: 100
+        entries_per_page = "100" # Min: 0, Max: 100
         random_item_batch = "1"
         total_searched_item_count = 0
         pagination_input = {
