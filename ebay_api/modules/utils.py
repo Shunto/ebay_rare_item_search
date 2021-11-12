@@ -46,3 +46,21 @@ def getEbayFindingApiResponse(operation_name, data, encoding, **headers):
     res = urllib.request.urlopen(req)
     #return res
     return res.read()
+
+def getEbayProductApiResponse(operation_name, data, encoding, **headers):
+
+    global_id = "EBAY-US"
+    endpoint = "http://svcs.ebay.com/services/marketplacecatalog/ProductService/v1"
+
+    http_headers = {
+        "X-EBAY-SOA-OPERATION-NAME": operation_name,
+        "X-EBAY-SOA-SECURITY-APPNAME": APP_ID,
+        "X-EBAY-SOA-RESPONSE-DATA-FORMAT": encoding
+    }
+
+    http_headers.update(headers)
+    
+    req = urllib.request.Request(endpoint, data, http_headers)
+    res = urllib.request.urlopen(req)
+    #return res
+    return res.read()

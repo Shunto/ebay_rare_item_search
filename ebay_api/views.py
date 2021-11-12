@@ -19,8 +19,48 @@ API_KEY = 'ShuntoMi-onlinefl-PRD-5abc8ca47-74474a69'
 EBAY_VERIFICATION_TOKEN = 'vCseeOgaClqLpLYJpUunocWXAJwactBSZNlAHHMVJhSlAQvoYM'
 
 # Create your views here.
+category_ids = ["20081", "550", "2984", "267", "12576", "625", "15032", "11450", "11116", "1", "58058", "293", "14339", "237", "11232", "45100", "172008", "26395", "11700", "281", "11233", "619", "1281", "870", "10542", "316", "888", "64482", "260", "1305", "220", "3252", "1249", "99"]
+
+category_dic = {
+    "20081": "Antiques",
+    "550": "Art",
+    "2984": "Baby",
+    "267": "Books & Magazines",
+    "12576": "Business & Industrial",
+    "625": "Cameras & Photo",
+    "15032": "Cell Phones & Accessories",
+    "11450": "Clothing, Shoes & Accessories",
+    "11116": "Coins & Paper Money",
+    "1": "Collectibles",
+    "58058": "Computers/Tablets & Networking",
+    "293": "Consumer Electronics",
+    "14339": "Crafts",
+    "237": "Dolls & Bears",
+    "11232": "Movies & TV",
+    "45100": "Entertainment Memorabilia",
+    "172008": "Gift Cards & Coupons",
+    "26395": "Health & Beauty",
+    "11700": "Home & Garden",
+    "281": "Jewelry & Watches",
+    "11233": "Music",
+    "619": "Musical Instruments & Gear",
+    "1281": "Pet Supplies",
+    "870": "Pottery & Glass",
+    "10542": "Real Estate",
+    "316": "Specialty Services",
+    "888": "Sporting Goods",
+    "64482": "Sports Mem, Cards & Fan Shop",
+    "260": "Stamps",
+    "1305": "Tickets & Experiences",
+    "220": "Toys & Hobbies",
+    "3252": "Travel",
+    "1249": "Video Games & Consoles",
+    "99": "Everything Else"
+}
 
 def home(request):
+    global category_ids
+    global category_dic
     category = request.GET.get('category')
     title = request.GET.get('title')
     product_id = request.GET.get('product_id')
@@ -37,7 +77,8 @@ def home(request):
     #condition = "3000"
     max_quantity = "1"
     min_quantity = "1"
-    item_keys = ["itemId", "title", "condition", "primaryCategory", "galleryURL", "viewItemURL"]
+    #item_keys = ["itemId", "title", "condition", "primaryCategory", "galleryURL", "viewItemURL"]
+    item_keys = ["itemId", "title", "primaryCategory", "galleryURL", "viewItemURL"]
 
     item_filter = [
         {
@@ -72,8 +113,131 @@ def home(request):
             "value": condition
         })
 
-    if category:
+    output_selector = ["AspectHistogram", "CategoryHistogram", "ConditionHistogram"]
+
+    if category and category == "all" and title_search == "false":
+        #if category == "all":
+        #category_id = category_ids[randint(0, len(category_ids))]
+        #else:
+            
+        operation_name = 'findItemsByCategory'
+        items = []
+        rare_items = []
+        random.shuffle(category_ids)
+        total_page_list = []
+        total_entry_list = []
+        randomized_page_number_list = []
+
+        for category_id in category_ids:
+            response = findItemsByCategory(category_id, itemFilter=item_filter)
+            data = json.loads(response.decode('utf-8'))
+            total_pages = data[operation_name+'Response'][0]['paginationOutput'][0]["totalPages"][0]
+            total_page_list.append(total_pages)
+            total_entries = data[operation_name+'Response'][0]['paginationOutput'][0]["totalEntries"][0]
+            total_entry_list.append(total_entries)
+
+            page_count = 0
+            if int(total_pages) <= 100:
+                page_numbers = list(range(1, int(total_pages)+1))
+            else:
+                #page_numbers = list(range(1, 101)) # max allowed page number = 100
+                page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
+            random.shuffle(page_numbers)
+            randomized_page_numbers = page_numbers
+            randomized_page_number_list.append(randomized_page_numbers)
+
+        entries_per_page = "5" # Min: 0, Max: 100
+        random_item_batch_count = "1"
+        total_searched_item_count = 0
+        pagination_output = []
+        missed_page_numbers = []
+        
+        while len(rare_items) < int(sample_count):
+        #while int(page_number) < 3:
+            category_left_flag = False
+            for i in range(0, len(category_ids)):
+                if page_count >= len(randomized_page_number_list[i]):
+                    continue
+                if page_count >= int(total_page_list[i]):
+                    continue
+                category_left_flag = True
+                pagination_input = {
+                    "entriesPerPage": entries_per_page,
+                    "pageNumber": str(randomized_page_number_list[i][page_count])
+                }
+                response = findItemsByCategory(category_ids[i], itemFilter=item_filter, paginationInput=pagination_input)
+                data = json.loads(response.decode('utf-8'))
+                if "item" in data[operation_name+'Response'][0]['searchResult'][0]:
+                    items = data[operation_name+'Response'][0]['searchResult'][0]['item']
+
+                    # filtering out items with no product ids
+                    if product_id_only == "true":
+                        items = [item for item in items if "productId" in item]
+                    elif product_id_only == "false":
+                        items = [item for item in items if "productId" not in item]
+                    # filtering out items when other items with the same product ids exist
+                    #if title_search == "true":
+                    #    items = uniqueItemFilterByTitle(items)
+                    #else:
+                    items = uniqueItemFilterByProductId(items)
+                    items = items
+
+                    #rare_items = rare_items + items[0:random_item_batch_count]
+                    rare_items = rare_items + items
+                else:
+                    missed_page_numbers.append(data[operation_name+'Response'][0]['paginationOutput'][0]['pageNumber'][0])
+            
+                pagination_output.append(data[operation_name+'Response'][0]['paginationOutput'][0])
+                searched_item_count = data[operation_name+'Response'][0]['paginationOutput'][0]['entriesPerPage'][0]
+                total_searched_item_count += int(searched_item_count)
+
+            page_count += 1
+            if category_left_flag == False:
+                break
+
+        for item in rare_items:
+            for item_key in item_keys:
+                item[item_key] = item[item_key][0]
+                '''if "conditionDisplayName" in item[item_key]:
+                    item[item_key]["conditionDisplayName"] = item[item_key]["conditionDisplayName"][0]'''
+                if "categoryName" in item[item_key]:
+                    item[item_key]["categoryName"] = item[item_key]["categoryName"][0]
+            if "condition" in item:
+                item["condition"] = item["condition"][0]
+                if "conditionDisplayName" in item["condition"]:
+                    item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+            if (title_search == "false") and ("productId" in item):
+                item["product_id"] = item["productId"][0]["__value__"]
+
+        pagination_output = [pagination_output, page_count+1, len(items), missed_page_numbers]
+        total_rare_item_count = len(rare_items)
+        random.shuffle(rare_items)
+        if int(sample_count) <= total_rare_item_count:
+            rare_items = rare_items[0:int(sample_count)]
+
+        output_info = {
+            "sampled_rare_item_count": len(rare_items),
+            "total_rare_item_count": total_rare_item_count,
+            "total_searched_item_count": total_searched_item_count,
+            "total_searched_page_count": page_count,
+            "page_numbers": page_numbers[0:5],
+            "total_entries": total_entries,
+            "searched_category": "All Categories"
+        }
+        
+        context = {
+            'data': data,
+            'items': rare_items,
+            'pagination_output': pagination_output,
+            'output_info': output_info
+        }
+        return render(request, 'ebay_api/home.html', context)
+    elif category:
+        #if category == "all":
+        #    category_id = category_ids[randint(0, len(category_ids))]
+        #else:
         category_id = category
+            
         operation_name = 'findItemsByCategory'
         items = []
         rare_items = []
@@ -91,7 +255,8 @@ def home(request):
             page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
         random.shuffle(page_numbers)
         randomized_page_numbers = page_numbers
-        entries_per_page = "10" # Min: 0, Max: 100
+        entries_per_page = "5" # Min: 0, Max: 100
+        random_item_batch = "1"
         total_searched_item_count = 0
         pagination_input = {
             "entriesPerPage": entries_per_page,
@@ -119,9 +284,10 @@ def home(request):
 
         #response = requests.get(url)
         #data = response.json()
-        while len(items) < int(sample_count):
+        while len(rare_items) < int(sample_count):
         #while int(page_number) < 3:
             
+            #response = findItemsByCategory(category_id, itemFilter=item_filter, paginationInput=pagination_input, outputSelector=output_selector)
             response = findItemsByCategory(category_id, itemFilter=item_filter, paginationInput=pagination_input)
                 
             data = json.loads(response.decode('utf-8'))
@@ -171,19 +337,24 @@ def home(request):
         for item in rare_items:
             for item_key in item_keys:
                 item[item_key] = item[item_key][0]
-                if "conditionDisplayName" in item[item_key]:
-                    item[item_key]["conditionDisplayName"] = item[item_key]["conditionDisplayName"][0]
                 if "categoryName" in item[item_key]:
                     item[item_key]["categoryName"] = item[item_key]["categoryName"][0]
-                if (title_search == "false") and ("productId" in item):
-                    item["product_id"] = item["productId"][0]["__value__"]
+            if "condition" in item:
+                item["condition"] = item["condition"][0]
+                if "conditionDisplayName" in item["condition"]:
+                    item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+            if (title_search == "false") and ("productId" in item):
+                item["product_id"] = item["productId"][0]["__value__"]
 
         pagination_output = [pagination_output, page_count+1, len(items), missed_page_numbers]
         total_rare_item_count = len(rare_items)
         random.shuffle(rare_items)
         if int(sample_count) <= total_rare_item_count:
-            rare_items[0:int(sample_count)]
-
+            rare_items = rare_items[0:int(sample_count)]
+        if category == "all":
+            searched_category = "All Categories"
+        else:
+            searched_categpry = category_dic[category]
         output_info = {
             "sampled_rare_item_count": len(rare_items),
             "total_rare_item_count": total_rare_item_count,
@@ -191,7 +362,8 @@ def home(request):
             "total_searched_page_count": page_count,
             "page_numbers": page_numbers[0:5],
             "total_entries": total_entries,
-            "searched_category": category
+            #"searched_category": category_dic[category]
+            "searched_category": searched_category
         }
         
         context = {
