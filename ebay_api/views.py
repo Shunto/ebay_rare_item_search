@@ -354,7 +354,7 @@ def home(request):
         if category == "all":
             searched_category = "All Categories"
         else:
-            searched_categpry = category_dic[category]
+            searched_category = category_dic[category]
         output_info = {
             "sampled_rare_item_count": len(rare_items),
             "total_rare_item_count": total_rare_item_count,
