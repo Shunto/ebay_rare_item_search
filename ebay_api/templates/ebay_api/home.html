@@ -1,7 +1,7 @@
 {% extends 'ebay_api/base.html' %}
 
 {% block content %}
-    <h2>Search by Category:</h2>
+    <h2>Search Conditions:</h2>
 
         <form action="" method="get">
             <select name="category" data-placeholder="Category" id="category_select" value="58058">
@@ -107,8 +107,8 @@
         <br> -->
         
     <p>{#{ pagination_output.totalEntries }#}</p>
-    <p>{{ pagination_output }}</p>
-    <p>{{ output_info }}</p>
+    <p>{#{ pagination_output }#}</p>
+    <p>{#{ output_info }#}</p>
     <p>{#{ items }#}
     <br>
     <br>
@@ -166,5 +166,5 @@
         
     {% endfor %}
     {#{ items }#}
-    {{ data }}
+    {#{ data }#}
 {% endblock%}
