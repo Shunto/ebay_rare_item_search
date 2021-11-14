@@ -64,18 +64,19 @@ def uniqueItemFilterByProductId(items):
     }
 
     for item in items:
-        product_id = item["productId"][0]["__value__"]
-        #product_id = "53039031"
-        #print("product id: {}".format(product_id))
-        response = findItemsByProduct(product_id, itemFilter=item_filter, paginationInput=pagination_input)
-        #print(response)
-        data = json.loads(response.decode('utf-8'))
+        if "productId" in item:
+            product_id = item["productId"][0]["__value__"]
+            #product_id = "53039031"
+            #print("product id: {}".format(product_id))
+            response = findItemsByProduct(product_id, itemFilter=item_filter, paginationInput=pagination_input)
+            #print(response)
+            data = json.loads(response.decode('utf-8'))
 
-        total_entries = int(data['findItemsByProductResponse'][0]['paginationOutput'][0]['totalEntries'][0])
-        print("total_entries: {}".format(total_entries))
+            total_entries = int(data['findItemsByProductResponse'][0]['paginationOutput'][0]['totalEntries'][0])
+            print("total_entries: {}".format(total_entries))
 
-        if total_entries == 1:
-            filtered_items.append(item)
+            if total_entries == 1:
+                filtered_items.append(item)
     
     return filtered_items
 

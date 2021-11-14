@@ -175,14 +175,11 @@ def home(request):
                     # filtering out items with no product ids
                     if product_id_only == "true":
                         items = [item for item in items if "productId" in item]
+                        # filtering out items when other items with the same product ids exist
+                        items = uniqueItemFilterByProductId(items)
+
                     elif product_id_only == "false":
                         items = [item for item in items if "productId" not in item]
-                    # filtering out items when other items with the same product ids exist
-                    #if title_search == "true":
-                    #    items = uniqueItemFilterByTitle(items)
-                    #else:
-                    items = uniqueItemFilterByProductId(items)
-                    items = items
 
                     #rare_items = rare_items + items[0:random_item_batch_count]
                     rare_items = rare_items + items
@@ -208,6 +205,10 @@ def home(request):
                 item["condition"] = item["condition"][0]
                 if "conditionDisplayName" in item["condition"]:
                     item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+            if "listingInfo" in item:
+                item["listingInfo"] = item["listingInfo"][0]
+                if "listingType" in item["listingInfo"]:
+                    item["listingInfo"]["listingType"] = item["listingInfo"]["listingType"][0]
             if (title_search == "false") and ("productId" in item):
                 item["product_id"] = item["productId"][0]["__value__"]
 
@@ -317,7 +318,7 @@ def home(request):
                 # filtering out items when other items with the same product ids exist
                 if title_search == "true":
                     items = uniqueItemFilterByTitle(items)
-                else:
+                elif product_id == "true" and title_search == "false":
                     items = uniqueItemFilterByProductId(items)
 
                 rare_items = rare_items + items
@@ -347,6 +348,7 @@ def home(request):
                 item["condition"] = item["condition"][0]
                 if "conditionDisplayName" in item["condition"]:
                     item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+                    
             if (title_search == "false") and ("productId" in item):
                 item["product_id"] = item["productId"][0]["__value__"]
 
@@ -396,6 +398,19 @@ def home(request):
             for item in items:
                 for item_key in item_keys:
                     item[item_key] = item[item_key][0]
+
+                    if "categoryName" in item[item_key]:
+                        item[item_key]["categoryName"] = item[item_key]["categoryName"][0]
+                if "condition" in item:
+                    item["condition"] = item["condition"][0]
+                    if "conditionDisplayName" in item["condition"]:
+                        item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+                if "listingInfo" in item:
+                    item["listingInfo"] = item["listingInfo"][0]
+                    if "listingType" in item["listingInfo"]:
+                        item["listingInfo"]["listingType"] = item["listingInfo"]["listingType"][0]
+                if (title_search == "false") and ("productId" in item):
+                    item["product_id"] = item["productId"][0]["__value__"]
                 
         pagination_output = data[operation_name+'Response'][0]['paginationOutput']
         
@@ -410,7 +425,7 @@ def home(request):
         #operation_name = 'findItemsByCategory'
         operation_name = 'findItemsByProduct'
         #variables = 'categoryId=10181&paginationInput.entriesPerPage=10'
-        variables = 'paginationInput.entriesPerPage=10&productId.@type=ReferenceID&productId=' + product_id
+        variables = 'paginationInput.entriesPerPage=100&productId.@type=ReferenceID&productId=' + product_id
         #variables = 'productId.@type=ReferenceID&productId={product_id}'
 
         url = f'https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME={operation_name}&SERVICE-VERSION=1.0.0&SECURITY-APPNAME={API_KEY}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&{variables}'
@@ -427,11 +442,21 @@ def home(request):
         for item in items:
             for item_key in item_keys:
                 item[item_key] = item[item_key][0]
-                if "productId" in item:
+                if "categoryName" in item[item_key]:
+                    item[item_key]["categoryName"] = item[item_key]["categoryName"][0]
+            if "condition" in item:
+                item["condition"] = item["condition"][0]
+                if "conditionDisplayName" in item["condition"]:
+                    item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+            if "listingInfo" in item:
+                item["listingInfo"] = item["listingInfo"][0]
+                if "listingType" in item["listingInfo"]:
+                    item["listingInfo"]["listingType"] = item["listingInfo"]["listingType"][0]
+            if "productId" in item:
                     #item["productId"] = item["productId"][0]
                     #item["productId"][0]["value"] = item["productId"][0]["__value__"]
                     #item["productId"] = item["productId"][0]
-                    item["product_id"] = item["productId"][0]["__value__"]
+                item["product_id"] = item["productId"][0]["__value__"]
 
         #for item_key in item_keys:
         #    items[0][item_key] = items[0][item_key][0]
@@ -453,8 +478,9 @@ def home(request):
 def google_search_results(request):
     
     query = request.GET.get('query')
-
-    links =  googleSearch(query)
+    num = 50
+    stop = 50
+    links =  googleSearch(query, num=num, stop=stop)
     
     results = {
         "query": query,
