@@ -107,13 +107,21 @@ def home(request):
         }
     ]
 
+    #if best_offer_only == "true":
+    item_filter.append({
+        "name": "ListingType",
+        #"value": ["Auction", "AuctionWithBIN", "Classified", "FixedPrice", "StoreInventory"]
+        "value": ["AuctionWithBIN", "Classified", "FixedPrice", "StoreInventory"]
+    })
+        
     if condition:
         item_filter.append({
             "name": "Condition",
             "value": condition
         })
 
-    output_selector = ["AspectHistogram", "CategoryHistogram", "ConditionHistogram"]
+    #output_selector = ["AspectHistogram", "CategoryHistogram", "ConditionHistogram"]
+    output_selector = ["CategoryHistogram", "ConditionHistogram"]
 
     if category and category == "all" and title_search == "false":
         #if category == "all":
@@ -122,6 +130,7 @@ def home(request):
             
         operation_name = 'findItemsByCategory'
         items = []
+        product_idd_items = []
         rare_items = []
         random.shuffle(category_ids)
         total_page_list = []
@@ -140,17 +149,19 @@ def home(request):
             if int(total_pages) <= 100:
                 page_numbers = list(range(1, int(total_pages)+1))
             else:
-                #page_numbers = list(range(1, 101)) # max allowed page number = 100
+                page_numbers = list(range(1, 101)) # max allowed page number = 100
                 #page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
-                page_numbers = list(range(1, 10)) # any page number greater than or equal to 30 doesn't work so far somehow
+                #page_numbers = list(range(1, 10)) # any page number greater than or equal to 30 doesn't work so far somehow
             random.shuffle(page_numbers)
             randomized_page_numbers = page_numbers
             randomized_page_number_list.append(randomized_page_numbers)
 
-        entries_per_page = "5" # Min: 0, Max: 100
-        #entries_per_page = "100" # Min: 0, Max: 100
-        random_item_batch_count = "1"
+        #entries_per_page = "5" # Min: 0, Max: 100
+        entries_per_page = "100" # Min: 0, Max: 100
+        random_item_batch_count = 3
         total_searched_item_count = 0
+        total_searched_product_idd_item_count = 0
+        total_rare_item_count = 0
         pagination_output = []
         missed_page_numbers = []
         
@@ -172,23 +183,33 @@ def home(request):
                 if "item" in data[operation_name+'Response'][0]['searchResult'][0]:
                     items = data[operation_name+'Response'][0]['searchResult'][0]['item']
 
+                    total_searched_item_count += len(items)
+                    product_idd_items = [item for item in items if "productId" in item]
+                    total_searched_product_idd_item_count += len(product_idd_items)
                     # filtering out items with no product ids
                     if product_id_only == "true":
-                        items = [item for item in items if "productId" in item]
+                        #items = [item for item in items if "productId" in item]
+                        items = product_idd_items
                         # filtering out items when other items with the same product ids exist
-                        items = uniqueItemFilterByProductId(items)
+                        items = uniqueItemFilterByProductId(items, best_offer_only)
 
                     elif product_id_only == "false":
                         items = [item for item in items if "productId" not in item]
 
-                    #rare_items = rare_items + items[0:random_item_batch_count]
-                    rare_items = rare_items + items
+                    total_rare_item_count += len(items)
+                    
+                    if len(items) > random_item_batch_count:
+                        random.shuffle(items)
+                        rare_items = rare_items + items[0:random_item_batch_count]
+                    else:
+                        rare_items = rare_items + items
+                        
                 else:
                     missed_page_numbers.append(data[operation_name+'Response'][0]['paginationOutput'][0]['pageNumber'][0])
             
                 pagination_output.append(data[operation_name+'Response'][0]['paginationOutput'][0])
-                searched_item_count = data[operation_name+'Response'][0]['paginationOutput'][0]['entriesPerPage'][0]
-                total_searched_item_count += int(searched_item_count)
+                #searched_item_count = data[operation_name+'Response'][0]['paginationOutput'][0]['entriesPerPage'][0]
+                #total_searched_item_count += int(searched_item_count)
 
             page_count += 1
             if category_left_flag == False:
@@ -213,7 +234,7 @@ def home(request):
                 item["product_id"] = item["productId"][0]["__value__"]
 
         pagination_output = [pagination_output, page_count+1, len(items), missed_page_numbers]
-        total_rare_item_count = len(rare_items)
+        #total_rare_item_count = len(rare_items)
         random.shuffle(rare_items)
         if int(sample_count) <= total_rare_item_count:
             rare_items = rare_items[0:int(sample_count)]
@@ -221,6 +242,7 @@ def home(request):
         output_info = {
             "sampled_rare_item_count": len(rare_items),
             "total_rare_item_count": total_rare_item_count,
+            "total_searched_product_idd_item_count": total_searched_product_idd_item_count,
             "total_searched_item_count": total_searched_item_count,
             "total_searched_page_count": page_count,
             "page_numbers": page_numbers[0:5],
@@ -243,6 +265,7 @@ def home(request):
             
         operation_name = 'findItemsByCategory'
         items = []
+        product_idd_items = []
         rare_items = []
 
         response = findItemsByCategory(category_id, itemFilter=item_filter)
@@ -254,15 +277,17 @@ def home(request):
         if int(total_pages) <= 100:
             page_numbers = list(range(1, int(total_pages)+1))
         else:
-            #page_numbers = list(range(1, 101)) # max allowed page number = 100
+            page_numbers = list(range(1, 101)) # max allowed page number = 100
             #page_numbers = list(range(1, 30)) # any page number greater than or equal to 30 doesn't work so far somehow
-            page_numbers = list(range(1, 10)) # any page number greater than or equal to 30 doesn't work so far somehow
+            #page_numbers = list(range(1, 10)) # any page number greater than or equal to 30 doesn't work so far somehow
         random.shuffle(page_numbers)
         randomized_page_numbers = page_numbers
-        entries_per_page = "5" # Min: 0, Max: 100
-        #entries_per_page = "100" # Min: 0, Max: 100
-        random_item_batch = "1"
+        #entries_per_page = "5" # Min: 0, Max: 100
+        entries_per_page = "100" # Min: 0, Max: 100
+        random_item_batch_count = 3
         total_searched_item_count = 0
+        total_searched_product_idd_item_count = 0
+        total_rare_item_count = 0
         pagination_input = {
             "entriesPerPage": entries_per_page,
             "pageNumber": str(randomized_page_numbers[page_count])
@@ -310,18 +335,30 @@ def home(request):
 
             #item_keys = items[0].keys()
                 #items = filter(lambda x: "productId" in x, items)
+                total_searched_item_count += len(items)
+                
+                product_idd_items = [item for item in items if "productId" in item]
+                total_searched_product_idd_item_count += len(product_idd_items)
                 # filtering out items with no product ids
                 if product_id_only == "true":
-                    items = [item for item in items if "productId" in item]
+                    #items = [item for item in items if "productId" in item]
+                    items = product_idd_items
                 elif product_id_only == "false":
                     items = [item for item in items if "productId" not in item]
+
                 # filtering out items when other items with the same product ids exist
                 if title_search == "true":
-                    items = uniqueItemFilterByTitle(items)
-                elif product_id == "true" and title_search == "false":
-                    items = uniqueItemFilterByProductId(items)
+                    items = uniqueItemFilterByTitle(items, best_offer_only)
+                elif product_id_only == "true" and title_search == "false":
+                    items = uniqueItemFilterByProductId(items, best_offer_only)
 
-                rare_items = rare_items + items
+                total_rare_item_count += len(items)
+
+                if len(items) > random_item_batch_count:
+                    random.shuffle(items)
+                    rare_items = rare_items + items[0:random_item_batch_count]
+                else:
+                    rare_items = rare_items + items
             else:
                 missed_page_numbers.append(data[operation_name+'Response'][0]['paginationOutput'][0]['pageNumber'][0])
             
@@ -329,8 +366,9 @@ def home(request):
             pagination_output.append(data[operation_name+'Response'][0]['paginationOutput'][0])
 
             page_count += 1
-            searched_item_count = data[operation_name+'Response'][0]['paginationOutput'][0]['entriesPerPage'][0]
-            total_searched_item_count += int(searched_item_count)
+            #searched_item_count = data[operation_name+'Response'][0]['paginationOutput'][0]['entriesPerPage'][0]
+            #total_searched_item_count += int(searched_item_count)
+            
 
             if page_count == len(randomized_page_numbers):
                 break
@@ -348,12 +386,16 @@ def home(request):
                 item["condition"] = item["condition"][0]
                 if "conditionDisplayName" in item["condition"]:
                     item["condition"]["conditionDisplayName"] = item["condition"]["conditionDisplayName"][0]
+            if "listingInfo" in item:
+                item["listingInfo"] = item["listingInfo"][0]
+                if "listingType" in item["listingInfo"]:
+                    item["listingInfo"]["listingType"] = item["listingInfo"]["listingType"][0]
                     
             if (title_search == "false") and ("productId" in item):
                 item["product_id"] = item["productId"][0]["__value__"]
 
         pagination_output = [pagination_output, page_count+1, len(items), missed_page_numbers]
-        total_rare_item_count = len(rare_items)
+        #total_rare_item_count = len(rare_items)
         random.shuffle(rare_items)
         if int(sample_count) <= total_rare_item_count:
             rare_items = rare_items[0:int(sample_count)]
@@ -364,6 +406,7 @@ def home(request):
         output_info = {
             "sampled_rare_item_count": len(rare_items),
             "total_rare_item_count": total_rare_item_count,
+            "total_searched_product_idd_item_count": total_searched_product_idd_item_count,
             "total_searched_item_count": total_searched_item_count,
             "total_searched_page_count": page_count,
             "page_numbers": page_numbers[0:5],

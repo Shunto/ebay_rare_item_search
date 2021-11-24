@@ -56,9 +56,19 @@ def findItemsAdvanced(keywords, categoryId=None, descriptionSearch=None, itemFil
     if itemFilter:
         for item in itemFilter:
             itemFilter_elem = etree.SubElement(root, "itemFilter")
+            multiple_values_flag = False
             for key in item:
-                key_elem = etree.SubElement(itemFilter_elem, key)
-                key_elem.text = item[key]
+                if item[key] == "ListingType":
+                    multiple_values_flag = True
+                if multiple_values_flag and (key == "value"):
+                    for value in item[key]:
+                        key_elem = etree.SubElement(itemFilter_elem, key)
+                        key_elem.text = value
+                    #mutliple_values_flag = False
+                else:
+                    key_elem = etree.SubElement(itemFilter_elem, key)
+                    key_elem.text = item[key]
+            mutliple_values_flag = False
  
     if paginationInput:
         paginationInput_elem = etree.SubElement(root, "paginationInput")
@@ -95,13 +105,23 @@ def findItemsByCategory(categoryId, itemFilter=None, paginationInput=None, outpu
     if categoryId:
         categoryId_elem = etree.SubElement(root, "categoryId")
         categoryId_elem.text = categoryId
-    
+
     if itemFilter:
         for item in itemFilter:
             itemFilter_elem = etree.SubElement(root, "itemFilter")
+            multiple_values_flag = False
             for key in item:
-                key_elem = etree.SubElement(itemFilter_elem, key)
-                key_elem.text = item[key]
+                if item[key] == "ListingType":
+                    multiple_values_flag = True
+                if multiple_values_flag and (key == "value"):
+                    for value in item[key]:
+                        key_elem = etree.SubElement(itemFilter_elem, key)
+                        key_elem.text = value
+                    #mutliple_values_flag = False
+                else:
+                    key_elem = etree.SubElement(itemFilter_elem, key)
+                    key_elem.text = item[key]
+            mutliple_values_flag = False
  
     if paginationInput:
         paginationInput_elem = etree.SubElement(root, "paginationInput")
@@ -134,13 +154,23 @@ def findItemsByProduct(productId, itemFilter=None, paginationInput=None, outputS
 
     productId_elem = etree.SubElement(root, "productId", type="ReferenceID")
     productId_elem.text = productId
-          
+
     if itemFilter:
         for item in itemFilter:
             itemFilter_elem = etree.SubElement(root, "itemFilter")
+            multiple_values_flag = False
             for key in item:
-                key_elem = etree.SubElement(itemFilter_elem, key)
-                key_elem.text = item[key]
+                if item[key] == "ListingType":
+                    multiple_values_flag = True
+                if multiple_values_flag and (key == "value"):
+                    for value in item[key]:
+                        key_elem = etree.SubElement(itemFilter_elem, key)
+                        key_elem.text = value
+                    #mutliple_values_flag = False
+                else:
+                    key_elem = etree.SubElement(itemFilter_elem, key)
+                    key_elem.text = item[key]
+            mutliple_values_flag = False
  
     if paginationInput:
         paginationInput_elem = etree.SubElement(root, "paginationInput")
@@ -210,6 +240,24 @@ def findProducts(QueryKeywords=None, MaxEntries=None, AvailableItemsOnly="true",
 if __name__ == "__main__":
     #getCategories()
     #findItemsByCategory("58058")
-    findItemsAdvanced("macbook", categoryId="")
+    best_offer_only = "false"
+    item_filter = [
+        {
+            "name": "BestOfferOnly",
+            "value": best_offer_only
+        }
+    ]
+    
+    item_filter.append({                                               
+        "name": "ListingType",
+        "value": ["Auction", "AuctionWithBIN", "Classified"]
+        #"value": ["Auction"]
+    })
+        #"value": "FixedPrice",                                                   #"value": "StoreInventory"                                             })
+    pagination_input = {
+        "entriesPerPage": "5",
+        "pageNumber": "1"
+    }
+    findItemsAdvanced("macbook", categoryId="", itemFilter=item_filter, paginationInput=pagination_input)
     #findItemsAdvanced("")
     #findProducts(MaxEntries="5")

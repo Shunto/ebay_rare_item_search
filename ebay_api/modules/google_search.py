@@ -1,8 +1,9 @@
 from googlesearch import search
 
-def googleSearch(query, country="us", num=20, stop=10, pause=2):
+def googleSearch(query, lang="en", country="us", num=20, stop=10, pause=2):
     links = []
     for j in search(query, country=country, num=num, stop=stop, pause=pause):
+    #for j in search(query, lang=lang, country=country, num=num, stop=stop, pause=pause):
         links.append(j)
         
     #for link in links:
